@@ -1,9 +1,10 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://3D/Character/Animations/Idle.tres" type="Animation" id=1]
 [ext_resource path="res://3D/Character/Animations/Walking2.tres" type="Animation" id=2]
 [ext_resource path="res://3D/Character/Base/skin.material" type="Material" id=3]
 [ext_resource path="res://Scenes/Character/Movement.gd" type="Script" id=4]
+[ext_resource path="res://Scenes/Character/Talking.gd" type="Script" id=5]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "Base_characterMedium"
@@ -258,9 +259,10 @@ nodes/Animation/position = Vector2( 20, 0 )
 nodes/move/node = SubResource( 10 )
 nodes/move/position = Vector2( 220, 60 )
 nodes/output/position = Vector2( 420, 120 )
-node_connections = [ "output", 0, "move", "move", 0, "Animation", "move", 1, "Animation 2" ]
+node_connections = [ "move", 0, "Animation", "move", 1, "Animation 2", "output", 0, "move" ]
 
-[node name="Character" type="KinematicBody"]
+[node name="Character" type="KinematicBody" groups=["Player"]]
+collision_layer = 2
 
 [node name="States" type="Spatial" parent="."]
 
@@ -270,6 +272,10 @@ __meta__ = {
 "_editor_description_": "
 "
 }
+
+[node name="Talking" type="Spatial" parent="States"]
+visible = false
+script = ExtResource( 5 )
 
 [node name="Base" type="Spatial" parent="."]
 transform = Transform( 0.35, 0, 0, 0, 0.35, 0, 0, 0, 0.35, 0, 0, 0 )
