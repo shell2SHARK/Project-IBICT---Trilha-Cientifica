@@ -1,10 +1,12 @@
-extends Spatial
+extends Area
 
 # Declara o node camera de onde surgira o raycast
 export (NodePath) var camera
 # Declara os valores de inicio e fim do raycast
 var rayOrigin: Vector3
 var rayEnd: Vector3
+var insideAHider: bool = false
+var isTalking: bool = false
 
 func _ready():
 	# Identifica quem é a camera do cenario
@@ -34,8 +36,19 @@ func _input(event):
 			# Caso o mouse interaja com algum objeto
 			# E se ele pertence a grupo onde o personagem pode andar
 			# Muda o pointer para o local escolhido com o mouse
-			if not intersection.empty() and intersection.collider.is_in_group("Walkable"):
+			if not intersection.empty() and intersection.collider.is_in_group("Walkable") and !isTalking:
 				print(intersection)
 				global_transform.origin = intersection.position
 			else:
 				print("nothing")
+
+# Quando estiver dentro de algum objeto com dialogo,esconde
+func _on_Pointer_body_entered(body):
+	if body.is_in_group("NPC"):
+		hide()
+		insideAHider = true
+
+# Quando estiver fora de algum objeto com dialogo,o script que escolhe
+func _on_Pointer_body_exited(body):
+	if body.is_in_group("NPC"):
+		insideAHider = false

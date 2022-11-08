@@ -1,6 +1,10 @@
 {
 	"events": [
 		{
+			"emit_signal": "inicio",
+			"event_id": "dialogic_040"
+		},
+		{
 			"character": "character-1666667805.json",
 			"event_id": "dialogic_001",
 			"portrait": "",

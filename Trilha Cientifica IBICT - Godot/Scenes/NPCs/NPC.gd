@@ -8,23 +8,34 @@ export(bool) var add_canvas = true
 export(bool) var zoom_camera = false
 # Checa quando ele pode falar ou nao
 var canTalk: bool = false
+var clickedOnMe: bool = false
+var touchingNPC: bool = false
 var player
 var mainCam
 var pointer
+var mat
 
 func _ready():
 	mainCam = get_tree().get_nodes_in_group("Camera")[0]
 	pointer = get_tree().get_nodes_in_group("Pointer")[0]
+	mat = $Base/Root/Skeleton/characterMedium.get_surface_material(0).next_pass
+	mat.set_shader_param("enable", false)
+	$Arrow.hide()
 
 func _physics_process(delta):
-	if Input.is_action_just_pressed("ui_select") and canTalk:
-		start_dialogue()
-		canTalk = false
+	# Quando clicar compara se pode conversar
+	if Input.is_action_just_pressed("Click"):
+		if canTalk:
+			clickedOnMe = true
+			pointer.isTalking = true
+			
+	$Arrow.rotate_y(0.1)
 
 func start_dialogue():
 	# Se o zoom estiver ativo, ativa a camera NPC e esconde o jogador 
 	if zoom_camera:
 		$Base/Camera.current = true
+		mainCam.current = false
 		player.hide()
 	
 	# Adiciona o dialogo na cena
@@ -41,7 +52,8 @@ func start_dialogue():
 	player.get_node("Base").look_at(player.global_transform.origin + global_transform.origin.direction_to(player.transform.origin),Vector3.UP)
 	# Esconde o ponteiro da cena e o balao da cabeca do NPC
 	pointer.hide()
-	$Baloon.hide()
+	pointer.global_transform.origin = player.global_transform.origin
+	$Arrow.hide()
 	
 func dialogic_signal(arg):
 	# Quando o signal for emitido ao final do dialogo
@@ -49,27 +61,45 @@ func dialogic_signal(arg):
 		# Se o zoom estiver ativo, mostra o jogador novamente
 		if zoom_camera:
 			player.show()
-		
-		# Desativa a camera do NPC novamente
-		$Base/Camera.current = false
-		# Mostra o balao de fala eo pointer 
-		$Baloon.show()
-		pointer.show()
-		# Habilita a camera do player novamente
-		mainCam.current = true
+			mainCam.current = true
+			$Base/Camera.current = false
+			
+		$Arrow.hide()
+		mat.set_shader_param("enable", false)
+		# Desabilita os controladores do dialogo
+		canTalk = false
+		clickedOnMe = false
 		# Habilita o state Move do player novamente
 		player.get_node("States/Talking").visible = false
 		player.get_node("States/Move").visible = true
 		yield(get_tree().create_timer(0.1),"timeout")
-		canTalk = true
+		pointer.isTalking = false
 
 func _on_Area_body_entered(body):
 	if body.is_in_group("Player"):
-		$Baloon.show()
-		canTalk = true
+		# Ativa a bool de toque
+		touchingNPC = true
 		player = body
+		# Se o jogador colidir pela primeira vez no NPC o dialogo dispara sozinho
+		if clickedOnMe:
+			start_dialogue()
 
 func _on_Area_body_exited(body):
 	if body.is_in_group("Player"):
-		$Baloon.hide()
 		canTalk = false
+		touchingNPC = false
+		pointer.isTalking = false
+
+func _on_Area_mouse_entered():
+	# Se o mouse tocar no NPC e ele ja nao estiver em colisão, habilita o dialogo
+	if !touchingNPC:
+		canTalk = true
+		$Arrow.show()
+		mat.set_shader_param("enable", true)
+
+func _on_Area_mouse_exited():
+	# Quando o mouse sair do NPC e ele nao estiver em dialogo, desativa a interação
+	if !clickedOnMe:
+		canTalk = false
+		$Arrow.hide()
+		mat.set_shader_param("enable", false)

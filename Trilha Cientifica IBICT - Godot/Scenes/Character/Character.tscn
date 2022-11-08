@@ -259,7 +259,7 @@ nodes/Animation/position = Vector2( 20, 0 )
 nodes/move/node = SubResource( 10 )
 nodes/move/position = Vector2( 220, 60 )
 nodes/output/position = Vector2( 420, 120 )
-node_connections = [ "move", 0, "Animation", "move", 1, "Animation 2", "output", 0, "move" ]
+node_connections = [ "output", 0, "move", "move", 0, "Animation", "move", 1, "Animation 2" ]
 
 [node name="Character" type="KinematicBody" groups=["Player"]]
 collision_layer = 2
